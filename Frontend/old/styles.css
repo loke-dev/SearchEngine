@@ -1,0 +1,13 @@
+/** CSS Styles */
+
+.searchInput {
+  width: 500px;
+}
+
+.searchButton {
+  width: 25px;
+}
+
+.result {
+  margin-top: 50px;
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SearchEngine</title>
+  <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
+  <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet" type="text/css"></link>
+  <link href="styles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+  <div id="app">
+    <v-app>
+      <v-content>
+        <v-container fluid>
+          <search></search>
+          <result></result>
+        </v-container>
+      </v-content>
+    </v-app>
+  </div>
+
+  <script type="text/x-template" id="search">
+    <v-layout column align-center>
+      <v-layout row>
+        <v-container grid-list-md text-xs-center>
+          <v-layout row wrap>
+              <v-flex xs12>
+                <v-text-field class="searchInput" name="input-1" label="Query" id="search"></v-text-field>
+                <v-btn color="primary">Search</v-btn>
+              </v-flex>
+          </v-layout>
+        </v-container>
+      </v-layout>
+    </v-layout>
+  </script>
+
+  <script type="text/x-template" id="result">
+    <v-layout column align-center class="result">
+        <form @submit="onSubmit">
+            <input type="text" placeholder="Enter username" v-model="userName" class="username" />
+            <center><img :src="userData.avatar_url" :alt="userData.name" style="width: 100px; height: auto; border-radius: 50%; margin-top: 10px; margin-bottom: 10px;" v-show="userData.avatar_url" /></center>
+            <h2 class="text-center">{{ userData.name }}</h2>
+            <p class="text-center" v-if="userData.email !== null"><a :href="'mailto:' + userData.email">{{ userData.email }}</a></p>
+            <p v-if="userData.email === null" class="text-center">This email is not public!</p>
+            <div class="row text-center">
+              <div class="col-xs-4">
+                <h6>Followers</h6>
+                <p>{{ userData.followers }}</p>
+              </div>
+              <div class="col-xs-4">
+                <h6>Following</h6>
+                <p>{{ userData.following }}</p>
+              </div>
+              <div class="col-xs-4">
+                <h6>Total Repo</h6>
+                <p>{{ userData.totalrepo }}</p>
+              </div>
+            </div>
+          </form>
+    </v-layout>
+  </script>
+
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/vuetify/dist/vuetify.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      components: {
+        'search': {
+          template: '#search'
+        },
+        'result': {
+          template: '#result',
+          props: ['userName', 'userData']
+        }
+      },
+      data: function() {
+        return {
+          userName: '',
+          userData: {
+            name: '',
+            avatar_url: '',
+            email: '',
+            followers: '',
+            following: '',
+            totalrepo: ''
+          }
+        }
+      },
+      methods: {
+        fetchGitHub: function() {
+          var totalRepo = this.totalRepo;
+          fetch('https://api.github.com/users/' + this.userName)
+            .then(function(response) {
+            response.json().then(function(json) {
+              return app.$data.userData = {
+                name: json.name,
+                avatar_url: json.avatar_url,
+                email: json.email,
+                followers: json.followers,
+                following: json.following,
+                totalrepo: json.public_repos
+              };
+            })
+          })
+            .catch(function(error) {
+            console.log(error);
+          })
+        },
+        onSubmit: function(e) {
+          e.preventDefault();
+          this.fetchGitHub();
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
